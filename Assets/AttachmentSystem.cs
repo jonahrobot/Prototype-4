@@ -1,3 +1,4 @@
+using System.Linq;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -8,48 +9,58 @@ public class AttachmentSystem : MonoBehaviour
     public Transform[] attachmentPoints;
 
     private Attachable[] attachments;
-    private bool isSelecting = false;
-    private Attachable selectedObject = null;
 
     void Start()
     {
         attachments = new Attachable[attachmentPoints.Length];
     }
 
-    int GetBestAttachmentPoint(Vector3 position)
+    int GetNextAttachmentPoint(bool full)
     {
-        int bestAttachmentPoint = -1;
-        float bestSqDistance = 1;
         for (int i = 0; i < attachmentPoints.Length; i++)
         {
-            if (attachments[i] == null)
+            if ((attachments[i] == null) ^ full)
             {
-                float sqDist = (attachmentPoints[i].transform.position - position).sqrMagnitude;
-                if (sqDist < bestSqDistance)
-                {
-                    bestSqDistance = sqDist;
-                    bestAttachmentPoint = i;
-                }
+                return i;
             }
         }
-        return bestAttachmentPoint;
+        return -1;
     }
 
-    void Detatch(Attachable attachable)
+    void Dettach(Attachable attachable)
     {
         for (int i = 0; i < attachments.Length; i++)
         {
             if(attachments[i] == attachable)
             {
-                attachments[i] = null;
+                Dettach(i);
                 return;
             }
         }
     }
 
+    void Dettach(int index)
+    {
+        if (index >= 0 && index < attachments.Length)
+        {
+            attachments[index] = null;
+        }
+    }
+
     void Attach(int index, Attachable attachable)
     {
-        attachments[index] = attachable;
+        if (index >= 0 && index < attachments.Length)
+        {
+            attachments[index] = attachable;
+        }
+    }
+
+    void Step(int index)
+    {
+        if(index >= 0 && index < attachments.Length && attachments[index] != null)
+        {
+            attachments[index].stepAction();
+        }
     }
 
     void Update()
@@ -59,58 +70,25 @@ public class AttachmentSystem : MonoBehaviour
             if (attachments[i] != null)
             {
                 attachments[i].transform.position = attachmentPoints[i].transform.position;
+                attachments[i].transform.rotation = attachmentPoints[i].transform.rotation;
             }
         }
 
-        if(isSelecting)
+        Attachable[] attachables = FindObjectsByType<Attachable>(FindObjectsSortMode.None);
+        foreach(Attachable attachable in attachables)
         {
-            if (Input.GetMouseButton(0))
+            if(!attachments.Contains(attachable))
             {
-                if(selectedObject == null)
+                if((attachable.transform.position - transform.position).sqrMagnitude < 4)
                 {
-                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    RaycastHit hit;
-                    if (Physics.Raycast(ray, out hit))
-                    {
-                        selectedObject = hit.transform.GetComponent<Attachable>();
-                        Detatch(selectedObject);
-                    }
-                }
-                else
-                {
-                    float dist = (Camera.main.transform.position - transform.position).magnitude;
-                    Vector3 goalPoint = Camera.main.transform.position + Camera.main.transform.forward * dist;
-                    int bestAttachmentPoint = GetBestAttachmentPoint(goalPoint);
-                    if(bestAttachmentPoint >= 0)
-                    {
-                        goalPoint = attachmentPoints[bestAttachmentPoint].position;
-                    }
-                    selectedObject.transform.position = goalPoint;
+                    Attach(GetNextAttachmentPoint(false), attachable);
                 }
             }
-            else if (selectedObject != null)
-            {
-                int bestAttachmentPoint = GetBestAttachmentPoint(selectedObject.transform.position);
-                if (bestAttachmentPoint >= 0)
-                {
-                    Attach(bestAttachmentPoint, selectedObject);
-                }
-                selectedObject = null;
-                isSelecting = false;
-            }
+        }
 
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                isSelecting = false;
-            }
-        }
-        else
+        if(Input.GetKeyDown(KeyCode.Space))
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                isSelecting = true;
-            }
+            Dettach(GetNextAttachmentPoint(true));
         }
-        rotationComposer.enabled = !isSelecting;
     }
 }
