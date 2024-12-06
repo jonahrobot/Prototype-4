@@ -63,13 +63,13 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(beatRateInSeconds);
 
         //// Play sound main
-        //coreAttachment.Step(1);
+        coreAttachment.Step(1);
 
         //// Play every other beat
-        //if(beatTrack % 2 == 0) coreAttachment.Step(2);
+        if(beatTrack % 2 == 0) coreAttachment.Step(2);
 
         //// Play every fourth beat
-        //if (beatTrack % 4 == 0) coreAttachment.Step(0);
+        if (beatTrack % 4 == 0) coreAttachment.Step(0);
 
         beatTrack += 1;
         transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);

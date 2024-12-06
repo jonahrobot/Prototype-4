@@ -58,11 +58,11 @@ public class AttachmentSystem : MonoBehaviour
         }
     }
 
-    void Step(int index)
+    public void Step(int index)
     {
         if(index >= 0 && index < attachments.Length && attachments[index] != null)
         {
-            attachments[index].stepAction();
+            attachments[index].stepAction.Invoke();
         }
     }
 

@@ -4,7 +4,8 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Rigidbody))]
 public class Attachable : MonoBehaviour
 {
-    public UnityAction stepAction;
+    [SerializeField]
+    public UnityEvent stepAction;
 
     void Start()
     {   
