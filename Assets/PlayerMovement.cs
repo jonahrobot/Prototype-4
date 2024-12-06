@@ -43,8 +43,17 @@ public class PlayerMovement : MonoBehaviour
             transform.rotation = Quaternion.Euler(0, angle, 0);
 
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            moveDir.y = -0.5f;
             characterController.Move(moveDir.normalized * speed * Time.deltaTime);
         }
+        else
+        {
+            Vector3 moveDir = Vector3.zero;
+            moveDir.y = -0.5f;
+            characterController.Move(moveDir.normalized * speed * Time.deltaTime);
+        }
+       
+
 
 
         // Pulse
