@@ -7,7 +7,8 @@ public class PlayerMovement : MonoBehaviour
     public CharacterController characterController;
     public float speed = 6f;
     public float turnSmoothTime = 0.1f;
-    public Transform cameraMain; 
+    public Transform cameraMain;
+    public bool playingMusic = false;
     float turnSmoothVelocity;
 
     [Header("Beat Stats")]
